@@ -1,0 +1,35 @@
+{
+    "paths": [
+        {
+            "name": "/username",
+            "lambdaFunction": "usernamestats",
+            "privacy": {
+                "open": true
+            },
+            "policyResourceName": "/username"
+        }
+    ],
+    "resourceName": "usernamestatsAPI",
+    "apiName": "usernamestatsAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "usernamestats"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "amplify-redditusernamestats-dev-170019-authRole",
+        "unAuthRoleName": "amplify-redditusernamestats-dev-170019-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "usernamestats",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
