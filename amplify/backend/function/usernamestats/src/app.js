@@ -60,7 +60,7 @@ function calculateCommentData(comments){
   commentChildren = comments.children
 
   //counting total comments for each subreddit
-  subCount = []
+  subCount = {}
   for(i = 0; i < commentChildren.length; i++){
     if(subCount[comments.children[i].data.subreddit]){
       subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
@@ -69,18 +69,35 @@ function calculateCommentData(comments){
       subCount[comments.children[i].data.subreddit] = 1
       }
     }
-  console.log(subCount)
+  console.log(JSON.stringify(subCount))
 
 
-  //counting total comments
+  //counting total comments & top commented sub
   sumComments = 0
+  mostCommentedSubreddit = {}
   for(const [key, value] of Object.entries(subCount)){
+    if(Object.keys(mostCommentedSubreddit).length === 0){
+      mostCommentedSubreddit[key] = value
+      }
+    else if(value > mostCommentedSubreddit[key]){
+        mostCommentedSubreddit[key] = value
+      }
       sumComments += value
   }
-  console.log(sumComments)
+  console.log(sumComments, mostCommentedSubreddit)
 
   //finding highest rated comment
   highestKarma = 0
+  for(i = 0; i < commentChildren.length; i++){
+    if(comments.children[i].data.score > highestKarma){
+      highestKarma = comments.children[i].data.score
+      highestKarmaLink = comments.children[i].data.link_permalink
+      highestKarmaText = comments.children[i].data.body
+    }
+  }
+
+  //finding highest rated comment
+
   for(i = 0; i < commentChildren.length; i++){
     if(comments.children[i].data.score > highestKarma){
       highestKarma = comments.children[i].data.score
@@ -93,7 +110,7 @@ function calculateCommentData(comments){
 
 
 
-  return ({total_comments: sumComments, comments_per_subreddit: subCount, highest_karma: {score: highestKarma, link: highestKarmaLink, text: highestKarmaText}})
+  return ({total_comments: sumComments, most_commented_subreddit: mostCommentedSubreddit, comments_per_subreddit: subCount, highest_karma: {score: highestKarma, link: highestKarmaLink, text: highestKarmaText}})
 
 }
 
