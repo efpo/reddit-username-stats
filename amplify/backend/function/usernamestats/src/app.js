@@ -34,7 +34,7 @@ const reddit = new Reddit({
 })
 
 app.get('/username', function(req, res) {
-
+  //allComments = {}
 //GovSchwarzenegger
 //robotekia
   reddit.get('/user/GovSchwarzenegger/comments', {
@@ -44,32 +44,78 @@ app.get('/username', function(req, res) {
     t: 'all',
     type: 'comments',
     username: 'GovSchwarzenegger',
-    // after:,
+    //after: 't1_gcqt68c',
     // before:,
     // count:,
     limit: 100,
-  }).then(result => {
+  }).then(async result => {
       //console.log(JSON.stringify(res.data, null, 4))
       //console.log(JSON.stringify(res.data.children[0].data.subreddit, null, 4))
-      res.json(calculateCommentData(result.data));
+      noOfComments = Object.keys(result.data.children).length
+      //console.log('children length ', Object.keys(result.data.children).length)
+      //console.log('afterid ', result.data.after)
+      allComments = result.data.children
+      //console.log("FIRST PRINT  ", allComments)
+      //console.log("comment length ", Object.keys(allComments).length)
+      //getComments(result.data.after)
+      afterID = result.data.after
+      while(noOfComments === 100){
+        //console.log('here')
+          await getComments(afterID).then(result => {
+            afterID = result.data.after
+            noOfComments = Object.keys(result.data.children).length
+            //a = a.concat([5, 4, 3]);
+            allComments = allComments.concat(result.data.children)
+            //console.log("IN WHILE LOOP  ", allComments)
+            //console.log(allComments.length)
+            //console.log("NO OF COMMENTS: ", Object.keys(result.data.children).length)
+          })
+
+      }
+      //console.log("DONE ", allComments.length)
+
+      //res.json(calculateCommentData(result.data));
+      res.json(calculateCommentData(allComments));
+      //console.log(result.data.after)
   })
 });
 
+async function getComments(afterID){
+  //make request
+  //check length of request
+  //if length is 100, get id of last comment in the list
+  //add to next request
+  //if <100, stop requesting
+
+  return await reddit.get('/user/GovSchwarzenegger/comments', {
+    context: 4,
+    show: 'given',
+    sort: 'new',
+    t: 'all',
+    type: 'comments',
+    username: 'GovSchwarzenegger',
+    after: afterID,
+    // before:,
+    // count:,
+    limit: 100,
+  })
+}
+
 function calculateCommentData(comments){
 
-  commentChildren = comments.children
+  commentChildren = comments
 
   //counting total comments for each subreddit
   subCount = {}
   for(i = 0; i < commentChildren.length; i++){
-    if(subCount[comments.children[i].data.subreddit]){
-      subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
+    if(subCount[comments[i].data.subreddit]){
+      subCount[comments[i].data.subreddit] = subCount[comments[i].data.subreddit] + 1
       }
     else {
-      subCount[comments.children[i].data.subreddit] = 1
+      subCount[comments[i].data.subreddit] = 1
       }
     }
-  console.log(JSON.stringify(subCount))
+  //console.log(JSON.stringify(subCount))
 
 
   //counting total comments & top commented sub
@@ -84,29 +130,19 @@ function calculateCommentData(comments){
       }
       sumComments += value
   }
-  console.log(sumComments, mostCommentedSubreddit)
+  //console.log(sumComments, mostCommentedSubreddit)
 
   //finding highest rated comment
   highestKarma = 0
   for(i = 0; i < commentChildren.length; i++){
-    if(comments.children[i].data.score > highestKarma){
-      highestKarma = comments.children[i].data.score
-      highestKarmaLink = comments.children[i].data.link_permalink
-      highestKarmaText = comments.children[i].data.body
+    if(comments[i].data.score > highestKarma){
+      highestKarma = comments[i].data.score
+      highestKarmaLink = comments[i].data.link_permalink
+      highestKarmaText = comments[i].data.body
     }
   }
 
-  //finding highest rated comment
-
-  for(i = 0; i < commentChildren.length; i++){
-    if(comments.children[i].data.score > highestKarma){
-      highestKarma = comments.children[i].data.score
-      highestKarmaLink = comments.children[i].data.link_permalink
-      highestKarmaText = comments.children[i].data.body
-    }
-  }
-
-  console.log(highestKarma, highestKarmaLink, highestKarmaText)
+  //console.log(highestKarma, highestKarmaLink, highestKarmaText)
 
 
 
