@@ -79,20 +79,21 @@ function calculateCommentData(comments){
   }
   console.log(sumComments)
 
-  //counting total highest rated comment
+  //finding highest rated comment
   highestKarma = 0
   for(i = 0; i < commentChildren.length; i++){
-    if(subCount[comments.children[i].data.subreddit]){
-      subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
-      }
-    else {
-      subCount[comments.children[i].data.subreddit] = 1
-      }
+    if(comments.children[i].data.score > highestKarma){
+      highestKarma = comments.children[i].data.score
+      highestKarmaLink = comments.children[i].data.link_permalink
+      highestKarmaText = comments.children[i].data.body
     }
+  }
+
+  console.log(highestKarma, highestKarmaLink, highestKarmaText)
 
 
 
-  return ({total_comments: sumComments, comments_per_subreddit: subCount})
+  return ({total_comments: sumComments, comments_per_subreddit: subCount, highest_karma: {score: highestKarma, link: highestKarmaLink, text: highestKarmaText}})
 
 }
 
