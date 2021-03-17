@@ -7,9 +7,6 @@ or in the "license" file accompanying this file. This file is distributed on an 
 See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-
-
 var express = require('express')
 var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
@@ -35,14 +32,8 @@ const reddit = new Reddit({
   appSecret: process.env.REDDIT_APPSECRET,
   userAgent: 'usernamestats/1.0.0'
 })
-/**********************
- * Example get method *
- **********************/
 
 app.get('/username', function(req, res) {
-  // Add your code here
-  res.json({success: 'get call succeed!', url: req.url});
-
 
 //GovSchwarzenegger
 //robotekia
@@ -57,21 +48,39 @@ app.get('/username', function(req, res) {
     // before:,
     // count:,
     limit: 100,
-  }).then(res =>{
+  }).then(result => {
       //console.log(JSON.stringify(res.data, null, 4))
       //console.log(JSON.stringify(res.data.children[0].data.subreddit, null, 4))
-      loopCounts(res.data)
-
-
+      res.json(calculateCommentData(result.data));
   })
 });
 
-function loopCounts(comments){
-  subCount = []
-  commentsCount = []
+function calculateCommentData(comments){
+
   commentChildren = comments.children
 
-//counting for number of comments
+  //counting total comments for each subreddit
+  subCount = []
+  for(i = 0; i < commentChildren.length; i++){
+    if(subCount[comments.children[i].data.subreddit]){
+      subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
+      }
+    else {
+      subCount[comments.children[i].data.subreddit] = 1
+      }
+    }
+  console.log(subCount)
+
+
+  //counting total comments
+  sumComments = 0
+  for(const [key, value] of Object.entries(subCount)){
+      sumComments += value
+  }
+  console.log(sumComments)
+
+  //counting total highest rated comment
+  highestKarma = 0
   for(i = 0; i < commentChildren.length; i++){
     if(subCount[comments.children[i].data.subreddit]){
       subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
@@ -81,62 +90,12 @@ function loopCounts(comments){
       }
     }
 
-  console.log(subCount)
 
-  sumComments = 0
-  for(const [key, value] of Object.entries(subCount)){
-      sumComments += value
-  }
 
-  console.log(sumComments)
+  return ({total_comments: sumComments, comments_per_subreddit: subCount})
+
 }
 
-app.get('/username/*', function(req, res) {
-  // Add your code here
-  res.json({success: 'get call succeed!', url: req.url});
-});
-
-/****************************
-* Example post method *
-****************************/
-
-app.post('/username', function(req, res) {
-  // Add your code here
-  res.json({success: 'post call succeed!', url: req.url, body: req.body})
-});
-
-app.post('/username/*', function(req, res) {
-  // Add your code here
-  res.json({success: 'post call succeed!', url: req.url, body: req.body})
-});
-
-/****************************
-* Example put method *
-****************************/
-
-app.put('/username', function(req, res) {
-  // Add your code here
-  res.json({success: 'put call succeed!', url: req.url, body: req.body})
-});
-
-app.put('/username/*', function(req, res) {
-  // Add your code here
-  res.json({success: 'put call succeed!', url: req.url, body: req.body})
-});
-
-/****************************
-* Example delete method *
-****************************/
-
-app.delete('/username', function(req, res) {
-  // Add your code here
-  res.json({success: 'delete call succeed!', url: req.url});
-});
-
-app.delete('/username/*', function(req, res) {
-  // Add your code here
-  res.json({success: 'delete call succeed!', url: req.url});
-});
 
 app.listen(3000, function() {
     console.log("App started")
