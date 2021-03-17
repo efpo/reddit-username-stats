@@ -43,6 +43,9 @@ app.get('/username', function(req, res) {
   // Add your code here
   res.json({success: 'get call succeed!', url: req.url});
 
+
+//GovSchwarzenegger
+//robotekia
   reddit.get('/user/GovSchwarzenegger/comments', {
     context: 4,
     show: 'given',
@@ -53,11 +56,40 @@ app.get('/username', function(req, res) {
     // after:,
     // before:,
     // count:,
-    //limit: 25,
+    limit: 100,
   }).then(res =>{
-      console.log(JSON.stringify(res.data, null, 4))
+      //console.log(JSON.stringify(res.data, null, 4))
+      //console.log(JSON.stringify(res.data.children[0].data.subreddit, null, 4))
+      loopCounts(res.data)
+
+
   })
 });
+
+function loopCounts(comments){
+  subCount = []
+  commentsCount = []
+  commentChildren = comments.children
+
+//counting for number of comments
+  for(i = 0; i < commentChildren.length; i++){
+    if(subCount[comments.children[i].data.subreddit]){
+      subCount[comments.children[i].data.subreddit] = subCount[comments.children[i].data.subreddit] + 1
+      }
+    else {
+      subCount[comments.children[i].data.subreddit] = 1
+      }
+    }
+
+  console.log(subCount)
+
+  sumComments = 0
+  for(const [key, value] of Object.entries(subCount)){
+      sumComments += value
+  }
+
+  console.log(sumComments)
+}
 
 app.get('/username/*', function(req, res) {
   // Add your code here
