@@ -33,67 +33,35 @@ const reddit = new Reddit({
   userAgent: 'usernamestats/1.0.0'
 })
 
-app.get('/username', function(req, res) {
-  //allComments = {}
-//GovSchwarzenegger
-//robotekia
-  reddit.get('/user/GovSchwarzenegger/comments', {
-    context: 4,
-    show: 'given',
-    sort: 'new',
-    t: 'all',
-    type: 'comments',
-    username: 'GovSchwarzenegger',
-    //after: 't1_gcqt68c',
-    // before:,
-    // count:,
-    limit: 100,
-  }).then(async result => {
-      //console.log(JSON.stringify(res.data, null, 4))
-      //console.log(JSON.stringify(res.data.children[0].data.subreddit, null, 4))
-      noOfComments = Object.keys(result.data.children).length
-      //console.log('children length ', Object.keys(result.data.children).length)
-      //console.log('afterid ', result.data.after)
-      allComments = result.data.children
-      //console.log("FIRST PRINT  ", allComments)
-      //console.log("comment length ", Object.keys(allComments).length)
-      //getComments(result.data.after)
+app.get('/stats', async function(req, res) {
+
+  const username = req.query.username
+  //example: GovSchwarzenegger
+
+  allComments = []
+  noOfComments = 0
+  afterID = 0
+  while(true){
+    await getComments(afterID, username).then(result => {
       afterID = result.data.after
-      while(noOfComments === 100){
-        //console.log('here')
-          await getComments(afterID).then(result => {
-            afterID = result.data.after
-            noOfComments = Object.keys(result.data.children).length
-            //a = a.concat([5, 4, 3]);
-            allComments = allComments.concat(result.data.children)
-            //console.log("IN WHILE LOOP  ", allComments)
-            //console.log(allComments.length)
-            //console.log("NO OF COMMENTS: ", Object.keys(result.data.children).length)
-          })
-
-      }
-      //console.log("DONE ", allComments.length)
-
-      //res.json(calculateCommentData(result.data));
-      res.json(calculateCommentData(allComments));
-      //console.log(result.data.after)
-  })
+      noOfComments = Object.keys(result.data.children).length
+      allComments = allComments.concat(result.data.children)
+    })
+    if(noOfComments != 100){
+      break
+    }
+  }
+  res.json(calculateCommentData(allComments));
 });
 
-async function getComments(afterID){
-  //make request
-  //check length of request
-  //if length is 100, get id of last comment in the list
-  //add to next request
-  //if <100, stop requesting
-
-  return await reddit.get('/user/GovSchwarzenegger/comments', {
+async function getComments(afterID, username){
+  return await reddit.get('/user/' + username + '/comments', {
     context: 4,
     show: 'given',
     sort: 'new',
     t: 'all',
     type: 'comments',
-    username: 'GovSchwarzenegger',
+    username: username,
     after: afterID,
     // before:,
     // count:,
@@ -103,11 +71,9 @@ async function getComments(afterID){
 
 function calculateCommentData(comments){
 
-  commentChildren = comments
-
   //counting total comments for each subreddit
   subCount = {}
-  for(i = 0; i < commentChildren.length; i++){
+  for(i = 0; i < comments.length; i++){
     if(subCount[comments[i].data.subreddit]){
       subCount[comments[i].data.subreddit] = subCount[comments[i].data.subreddit] + 1
       }
@@ -115,8 +81,6 @@ function calculateCommentData(comments){
       subCount[comments[i].data.subreddit] = 1
       }
     }
-  //console.log(JSON.stringify(subCount))
-
 
   //counting total comments & top commented sub
   sumComments = 0
@@ -130,11 +94,10 @@ function calculateCommentData(comments){
       }
       sumComments += value
   }
-  //console.log(sumComments, mostCommentedSubreddit)
 
   //finding highest rated comment
   highestKarma = 0
-  for(i = 0; i < commentChildren.length; i++){
+  for(i = 0; i < comments.length; i++){
     if(comments[i].data.score > highestKarma){
       highestKarma = comments[i].data.score
       highestKarmaLink = comments[i].data.link_permalink
@@ -142,12 +105,16 @@ function calculateCommentData(comments){
     }
   }
 
-  //console.log(highestKarma, highestKarmaLink, highestKarmaText)
-
-
-
-  return ({total_comments: sumComments, most_commented_subreddit: mostCommentedSubreddit, comments_per_subreddit: subCount, highest_karma: {score: highestKarma, link: highestKarmaLink, text: highestKarmaText}})
-
+  return ({
+    total_comments: sumComments,
+    most_commented_subreddit: mostCommentedSubreddit,
+    comments_per_subreddit: subCount,
+    highest_karma: {
+      score: highestKarma,
+      link: highestKarmaLink,
+      text: highestKarmaText
+    }
+  })
 }
 
 
@@ -155,7 +122,5 @@ app.listen(3000, function() {
     console.log("App started")
 });
 
-// Export the app object. When executing the application local this does nothing. However,
-// to port it to AWS Lambda we will create a wrapper around that will load the app from
-// this file
+
 module.exports = app
