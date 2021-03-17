@@ -73,7 +73,7 @@ function calculateCommentData(comments){
 
   //counting total comments for each subreddit
   subCount = {}
-  for(i = 0; i < comments.length; i++){
+  for(var i = 0; i < comments.length; i++){
     if(subCount[comments[i].data.subreddit]){
       subCount[comments[i].data.subreddit] = subCount[comments[i].data.subreddit] + 1
       }
@@ -97,7 +97,7 @@ function calculateCommentData(comments){
 
   //finding highest rated comment
   highestKarma = 0
-  for(i = 0; i < comments.length; i++){
+  for(var i = 0; i < comments.length; i++){
     if(comments[i].data.score > highestKarma){
       highestKarma = comments[i].data.score
       highestKarmaLink = comments[i].data.link_permalink

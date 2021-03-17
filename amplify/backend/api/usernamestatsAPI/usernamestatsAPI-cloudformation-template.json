@@ -90,7 +90,7 @@
             ],
             "paths": {
               
-              "/username": {
+              "/stats": {
                 "options": {
                   "consumes": [
                     "application/json"
@@ -189,7 +189,7 @@
                   }
                 }
               },
-              "/username/{proxy+}": {
+              "/stats/{proxy+}": {
                 "options": {
                   "consumes": [
                     "application/json"
@@ -367,7 +367,7 @@
         
         
         
-      "DeploymentAPIGWusernamestatsAPI": {
+      "DeploymentAPIGWusernamestatsAPIea54dbab": {
         "Type": "AWS::ApiGateway::Deployment",
         "Properties": {
           "Description": "The Development stage deployment of your API.",

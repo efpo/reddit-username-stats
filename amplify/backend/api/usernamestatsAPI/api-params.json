@@ -1,12 +1,12 @@
 {
     "paths": [
         {
-            "name": "/username",
+            "name": "/stats",
             "lambdaFunction": "usernamestats",
             "privacy": {
                 "open": true
             },
-            "policyResourceName": "/username"
+            "policyResourceName": "/stats"
         }
     ],
     "resourceName": "usernamestatsAPI",
@@ -31,5 +31,6 @@
                 "Arn"
             ]
         }
-    ]
+    ],
+    "uuid": "ea54dbab"
 }
