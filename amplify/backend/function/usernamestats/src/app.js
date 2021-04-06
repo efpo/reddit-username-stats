@@ -36,14 +36,27 @@ const reddit = new Reddit({
 app.get('/stats', async function(req, res) {
 
   const username = req.query.username
+  const filter = req.query.filter
   //example: GovSchwarzenegger
 
   allComments = await getItems('comments', username)
   allPosts = await getItems('submitted', username)
 
-  const result = {
-    commentStats: await calculateResourceData(allComments, 'comments'),
-    postStats: await calculateResourceData(allPosts, 'submitted')
+  if(filter != null){
+    filterResources(filter, allComments, allPosts)
+  }
+
+  var result = {}
+  if(filter != null){
+   result = {
+      comment: await filterResources(filter, allComments),
+      post: await filterResources(filter, allPosts)
+    }
+  } else {
+    result = {
+      commentStats: await calculateResourceData(allComments, 'comments'),
+      postStats: await calculateResourceData(allPosts, 'submitted')
+    }
   }
 
   res.json(result);
@@ -134,6 +147,17 @@ function calculateResourceData(resources, resourceType){
       text: highestKarmaText
     }
   })
+}
+
+function filterResources(filter, allResources){
+  filteredResources = []
+  for(var i = 0; i < allResources.length; i++){
+    if(filter === allResources[i].data.subreddit){
+      filteredResources = filteredResources.concat(allResources[i])
+    }
+  }
+
+  return filteredResources
 }
 
 
