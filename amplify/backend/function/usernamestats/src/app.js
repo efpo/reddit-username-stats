@@ -38,29 +38,44 @@ app.get('/stats', async function(req, res) {
   const username = req.query.username
   //example: GovSchwarzenegger
 
-  allComments = []
-  noOfComments = 0
+  allComments = await getItems('comments', username)
+  allPosts = await getItems('submitted', username)
+
+  const result = {
+    commentStats: await calculateResourceData(allComments, 'comments'),
+    postStats: await calculateResourceData(allPosts, 'submitted')
+  }
+
+  res.json(result);
+});
+
+async function getItems(resourceType, username){
+  console.log('getItems called with ', resourceType, username )
+  allResources = []
+  noOfResources = 0
   afterID = 0
+
   while(true){
-    await getComments(afterID, username).then(result => {
+    await getResources(afterID, username, resourceType).then(result => {
       afterID = result.data.after
-      noOfComments = Object.keys(result.data.children).length
-      allComments = allComments.concat(result.data.children)
+      noOfResources = Object.keys(result.data.children).length
+      allResources= allResources.concat(result.data.children)
     })
-    if(noOfComments != 100){
+    if(noOfResources != 100){
       break
     }
   }
-  res.json(calculateCommentData(allComments));
-});
+  return allResources
+}
 
-async function getComments(afterID, username){
-  return await reddit.get('/user/' + username + '/comments', {
+async function getResources(afterID, username, resourceType){
+  console.log('getResources called with ', resourceType, username)
+  return await reddit.get('/user/' + username + '/' + resourceType, {
     context: 4,
     show: 'given',
     sort: 'new',
     t: 'all',
-    type: 'comments',
+    type: resourceType,
     username: username,
     after: afterID,
     // before:,
@@ -69,46 +84,50 @@ async function getComments(afterID, username){
   })
 }
 
-function calculateCommentData(comments){
+function calculateResourceData(resources, resourceType){
 
-  //counting total comments for each subreddit
+  //counting total resources for each subreddit
   subCount = {}
-  for(var i = 0; i < comments.length; i++){
-    if(subCount[comments[i].data.subreddit]){
-      subCount[comments[i].data.subreddit] = subCount[comments[i].data.subreddit] + 1
+  for(var i = 0; i < resources.length; i++){
+    if(subCount[resources[i].data.subreddit]){
+      subCount[resources[i].data.subreddit] = subCount[resources[i].data.subreddit] + 1
       }
     else {
-      subCount[comments[i].data.subreddit] = 1
+      subCount[resources[i].data.subreddit] = 1
       }
     }
 
-  //counting total comments & top commented sub
-  sumComments = 0
-  mostCommentedSubreddit = {}
+  //counting total resources & top posted sub
+  sumResources = 0
+  mostPostedSubreddit = {}
   for(const [key, value] of Object.entries(subCount)){
-    if(Object.keys(mostCommentedSubreddit).length === 0){
-      mostCommentedSubreddit[key] = value
+    if(Object.keys(mostPostedSubreddit).length === 0){
+      mostPostedSubreddit[key] = value
       }
-    else if(value > mostCommentedSubreddit[key]){
-        mostCommentedSubreddit[key] = value
+    else if(value > mostPostedSubreddit[key]){
+        mostPostedSubreddit[key] = value
       }
-      sumComments += value
+      sumResources += value
   }
 
-  //finding highest rated comment
+  //finding highest rated resource
   highestKarma = 0
-  for(var i = 0; i < comments.length; i++){
-    if(comments[i].data.score > highestKarma){
-      highestKarma = comments[i].data.score
-      highestKarmaLink = comments[i].data.link_permalink
-      highestKarmaText = comments[i].data.body
+  for(var i = 0; i < resources.length; i++){
+    if(resources[i].data.score > highestKarma){
+      highestKarma = resources[i].data.score
+      highestKarmaLink = resources[i].data.permalink
+      if(resourceType === 'submitted'){
+        highestKarmaText = resources[i].data.title
+      } else {
+        highestKarmaText = resources[i].data.body
+      }
     }
   }
 
   return ({
-    total_comments: sumComments,
-    most_commented_subreddit: mostCommentedSubreddit,
-    comments_per_subreddit: subCount,
+    total: sumResources,
+    most_posted_subreddit: mostPostedSubreddit,
+    posted_per_subreddit: subCount,
     highest_karma: {
       score: highestKarma,
       link: highestKarmaLink,

@@ -15,7 +15,7 @@
       "function": {
         "usernamestats": {
           "deploymentBucketName": "amplify-redditusernamestats-dev-170019-deployment",
-          "s3Key": "amplify-builds/usernamestats-50677a555076694b6c57-build.zip"
+          "s3Key": "amplify-builds/usernamestats-7274433033564f4d4643-build.zip"
         }
       }
     }
