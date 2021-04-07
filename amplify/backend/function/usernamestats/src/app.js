@@ -42,15 +42,15 @@ app.get('/stats', async function(req, res) {
   allComments = await getItems('comments', username)
   allPosts = await getItems('submitted', username)
 
-  if(filter != null){
-    filterResources(filter, allComments, allPosts)
-  }
-
   var result = {}
   if(filter != null){
+    filterResourcesComments = await filterResources(filter, allComments)
+    filterResourcesPosts = await filterResources(filter, allPosts)
    result = {
-      comment: await filterResources(filter, allComments),
-      post: await filterResources(filter, allPosts)
+      commentStats: await calculateResourceData(filterResourcesComments, 'comments'),
+      postStats: await calculateResourceData(filterResourcesPosts, 'submitted'),
+      comments: await editFilteredData(filter, filterResourcesComments),
+      posts: await editFilteredData(filter, filterResourcesPosts)
     }
   } else {
     result = {
@@ -158,6 +158,17 @@ function filterResources(filter, allResources){
   }
 
   return filteredResources
+}
+
+function editFilteredData(filter, allResources){
+  filteredResources = []
+    for(var i = 0; i < allResources.length; i++){
+        filteredResources = filteredResources.concat({subreddit: allResources[i].data.subreddit,
+          karma: allResources[i].data.score, title: allResources[i].data.title,
+          comment: allResources[i].data.body, link: allResources[i].data.permalink})
+    }
+
+    return filteredResources
 }
 
 
