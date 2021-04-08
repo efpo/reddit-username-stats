@@ -6,6 +6,9 @@ Licensed under the Apache License, Version 2.0 (the "License"). You may not use 
 or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 */
+//ERROR HANDLING
+//TESTING
+//CLEAN UP
 
 var express = require('express')
 var bodyParser = require('body-parser')
@@ -46,16 +49,16 @@ app.get('/stats', async function(req, res) {
   if(filter != null){
     filterResourcesComments = await filterResources(filter, allComments)
     filterResourcesPosts = await filterResources(filter, allPosts)
-   result = {
-      commentStats: await calculateResourceData(filterResourcesComments, 'comments'),
-      postStats: await calculateResourceData(filterResourcesPosts, 'submitted'),
+    result = {
+      comment_stats: await calculateResourceData(filterResourcesComments, 'comments'),
+      post_stats: await calculateResourceData(filterResourcesPosts, 'submitted'),
       comments: await editFilteredData(filter, filterResourcesComments),
       posts: await editFilteredData(filter, filterResourcesPosts)
     }
   } else {
-    result = {
-      commentStats: await calculateResourceData(allComments, 'comments'),
-      postStats: await calculateResourceData(allPosts, 'submitted')
+      result = {
+        comment_stats: await calculateResourceData(allComments, 'comments'),
+        post_stats: await calculateResourceData(allPosts, 'submitted')
     }
   }
 
@@ -97,8 +100,28 @@ async function getResources(afterID, username, resourceType){
   })
 }
 
+
 function calculateResourceData(resources, resourceType){
 
+    subCount = countSubreddits(resources)
+
+    subCountAndMostPostedSub = countKarmaAndMostPostedSubreddit(subCount)
+
+    highestKarma = findHighestKarma(resources, resourceType)
+
+  return ({
+    total: sumKarma,
+    most_posted_subreddit: subCountAndMostPostedSub.mostPostedSubreddit,
+    posted_per_subreddit: subCountAndMostPostedSub.subCount,
+    highest_karma: {
+      score: highestKarma.highestKarma,
+      link: highestKarma.highestKarmaLink,
+      text: highestKarma.highestKarmaText
+    }
+  })
+}
+
+function countSubreddits(resources){
   //counting total resources for each subreddit
   subCount = {}
   for(var i = 0; i < resources.length; i++){
@@ -110,18 +133,31 @@ function calculateResourceData(resources, resourceType){
       }
     }
 
+    return subCount
+}
+
+function countKarmaAndMostPostedSubreddit(subCount){
+
   //counting total resources & top posted sub
-  sumResources = 0
+  sumKarma = 0
   mostPostedSubreddit = {}
   for(const [key, value] of Object.entries(subCount)){
     if(Object.keys(mostPostedSubreddit).length === 0){
       mostPostedSubreddit[key] = value
-      }
+    }
     else if(value > mostPostedSubreddit[key]){
         mostPostedSubreddit[key] = value
-      }
-      sumResources += value
+    }
+    sumKarma += value
   }
+
+  result = {sumKarma: sumKarma, mostPostedSubreddit: mostPostedSubreddit}
+
+  return result
+
+}
+
+function findHighestKarma(resources, resourceType){
 
   //finding highest rated resource
   highestKarma = 0
@@ -137,16 +173,11 @@ function calculateResourceData(resources, resourceType){
     }
   }
 
-  return ({
-    total: sumResources,
-    most_posted_subreddit: mostPostedSubreddit,
-    posted_per_subreddit: subCount,
-    highest_karma: {
-      score: highestKarma,
-      link: highestKarmaLink,
-      text: highestKarmaText
-    }
-  })
+  result = {highestKarma: highestKarma, highestKarmaLink: highestKarmaLink,
+     highestKarmaText: highestKarmaText}
+
+  return result
+
 }
 
 function filterResources(filter, allResources){
@@ -162,13 +193,13 @@ function filterResources(filter, allResources){
 
 function editFilteredData(filter, allResources){
   filteredResources = []
-    for(var i = 0; i < allResources.length; i++){
-        filteredResources = filteredResources.concat({subreddit: allResources[i].data.subreddit,
-          karma: allResources[i].data.score, title: allResources[i].data.title,
-          comment: allResources[i].data.body, link: allResources[i].data.permalink})
-    }
+  for(var i = 0; i < allResources.length; i++){
+    filteredResources = filteredResources.concat({subreddit: allResources[i].data.subreddit,
+    karma: allResources[i].data.score, title: allResources[i].data.title,
+    comment: allResources[i].data.body, link: allResources[i].data.permalink})
+  }
 
-    return filteredResources
+  return filteredResources
 }
 
 
