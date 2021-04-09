@@ -124,3 +124,7 @@ returns JSON output:
   }
 }
 ```
+
+It's also possible to add a subreddit filter to get stats, comments and posts of only a specific subreddit:
+
+`<your-amplify-url-here>/stats?username=GovSchwarzenegger&filter=fitness`
