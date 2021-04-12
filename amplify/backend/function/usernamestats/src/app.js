@@ -202,10 +202,10 @@ function editFilteredData(filter, allResources){
   return filteredResources
 }
 
+function sum(a, b) {
+  return a + b;
+}
+module.exports = sum;
 
-app.listen(3000, function() {
-    console.log("App started")
-});
 
-
-module.exports = app
+module.exports = { app, sum }
