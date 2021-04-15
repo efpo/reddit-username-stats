@@ -1,0 +1,20 @@
+{
+    "total": 16,
+    "most_posted_subreddit": {
+      "AnimalsBeingJerks": 1
+    },
+    "posted_per_subreddit": {
+      "AnimalsBeingJerks": 1,
+      "houseplants": 3,
+      "CatsAreAssholes": 1,
+      "aww": 6,
+      "funny": 3,
+      "pics": 1,
+      "AskReddit": 1
+    },
+    "highest_karma": {
+      "score": 1657,
+      "link": "/r/AnimalsBeingJerks/comments/mqf70q/recently_moved_my_bird_feeder_because_of_the/",
+      "text": "Recently moved my bird feeder because of the squirrels... now this"
+    }
+}

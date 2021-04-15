@@ -41,13 +41,15 @@ app.get('/stats', async function(req, res) {
   const username = req.query.username
   const filter = req.query.filter
   //example: GovSchwarzenegger
-
+  //example:Danny109_____
+  //example: hscheel
   allComments = await getItems('comments', username)
   allPosts = await getItems('submitted', username)
 
   var result = {}
   if(filter != null){
     filterResourcesComments = await filterResources(filter, allComments)
+    console.log(JSON.stringify(filterResourcesComments, null, 4))
     filterResourcesPosts = await filterResources(filter, allPosts)
     result = {
       comment_stats: await calculateResourceData(filterResourcesComments, 'comments'),
@@ -110,9 +112,9 @@ function calculateResourceData(resources, resourceType){
     highestKarma = findHighestKarma(resources, resourceType)
 
   return ({
-    total: sumKarma,
+    total: subCountAndMostPostedSub.sumKarma,
     most_posted_subreddit: subCountAndMostPostedSub.mostPostedSubreddit,
-    posted_per_subreddit: subCountAndMostPostedSub.subCount,
+    posted_per_subreddit: subCount,
     highest_karma: {
       score: highestKarma.highestKarma,
       link: highestKarma.highestKarmaLink,
@@ -132,7 +134,6 @@ function countSubreddits(resources){
       subCount[resources[i].data.subreddit] = 1
       }
     }
-
     return subCount
 }
 
@@ -142,16 +143,16 @@ function countKarmaAndMostPostedSubreddit(subCount){
   sumKarma = 0
   mostPostedSubreddit = {}
   for(const [key, value] of Object.entries(subCount)){
-    if(Object.keys(mostPostedSubreddit).length === 0){
-      mostPostedSubreddit[key] = value
-    }
-    else if(value > mostPostedSubreddit[key]){
-        mostPostedSubreddit[key] = value
-    }
-    sumKarma += value
-  }
+   if(Object.keys(mostPostedSubreddit).length === 0){
+     mostPostedSubreddit[key] = value
+     }
+   else if(value > mostPostedSubreddit[key]){
+       mostPostedSubreddit[key] = value
+     }
+     sumKarma += value
+   }
 
-  result = {sumKarma: sumKarma, mostPostedSubreddit: mostPostedSubreddit}
+  result = { sumKarma: sumKarma, mostPostedSubreddit: mostPostedSubreddit }
 
   return result
 
@@ -160,9 +161,11 @@ function countKarmaAndMostPostedSubreddit(subCount){
 function findHighestKarma(resources, resourceType){
 
   //finding highest rated resource
+  highestKarmaLink = null
+  highestKarmaText = null
   highestKarma = 0
   for(var i = 0; i < resources.length; i++){
-    if(resources[i].data.score > highestKarma){
+    if(resources[i].data.score >= highestKarma){
       highestKarma = resources[i].data.score
       highestKarmaLink = resources[i].data.permalink
       if(resourceType === 'submitted'){
@@ -205,7 +208,5 @@ function editFilteredData(filter, allResources){
 function sum(a, b) {
   return a + b;
 }
-module.exports = sum;
 
-
-module.exports = { app, sum }
+module.exports = { app, sum, calculateResourceData, filterResources }

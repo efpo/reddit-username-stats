@@ -1,6 +1,6 @@
 const app = require('./app.js')
 
-app.listen(3000, function() {
+app.app.listen(3000, function() {
     console.log("App started")
 });
 
