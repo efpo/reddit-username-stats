@@ -47,18 +47,18 @@ app.get('/stats', async function(req, res) {
 
   var result = {}
   if(filter != null){
-    filterResourcesComments = await filterResources(filter, allComments)
-    filterResourcesPosts = await filterResources(filter, allPosts)
+    filterResourcesComments = filterResources(filter, allComments)
+    filterResourcesPosts = filterResources(filter, allPosts)
     result = {
-      comment_stats: await calculateResourceData(filterResourcesComments, 'comments'),
-      post_stats: await calculateResourceData(filterResourcesPosts, 'submitted'),
-      comments: await editFilteredData(filter, filterResourcesComments),
-      posts: await editFilteredData(filter, filterResourcesPosts)
+      comment_stats: calculateResourceData(filterResourcesComments, 'comments'),
+      post_stats: calculateResourceData(filterResourcesPosts, 'submitted'),
+      comments: editFilteredData(filter, filterResourcesComments),
+      posts: editFilteredData(filter, filterResourcesPosts)
     }
   } else {
       result = {
-        comment_stats: await calculateResourceData(allComments, 'comments'),
-        post_stats: await calculateResourceData(allPosts, 'submitted')
+        comment_stats: calculateResourceData(allComments, 'comments'),
+        post_stats: calculateResourceData(allPosts, 'submitted')
     }
   }
 
@@ -151,7 +151,7 @@ function countKarmaAndMostPostedSubreddit(subCount){
     sumKarma += value
   }
 
-  result = {sumKarma: sumKarma, mostPostedSubreddit: mostPostedSubreddit}
+  result = { sumKarma: sumKarma, mostPostedSubreddit: mostPostedSubreddit }
 
   return result
 
@@ -173,8 +173,11 @@ function findHighestKarma(resources, resourceType){
     }
   }
 
-  result = {highestKarma: highestKarma, highestKarmaLink: highestKarmaLink,
-     highestKarmaText: highestKarmaText}
+  result = {
+     highestKarma: highestKarma,
+     highestKarmaLink: highestKarmaLink,
+     highestKarmaText: highestKarmaText
+  }
 
   return result
 
@@ -194,9 +197,13 @@ function filterResources(filter, allResources){
 function editFilteredData(filter, allResources){
   filteredResources = []
   for(var i = 0; i < allResources.length; i++){
-    filteredResources = filteredResources.concat({subreddit: allResources[i].data.subreddit,
-    karma: allResources[i].data.score, title: allResources[i].data.title,
-    comment: allResources[i].data.body, link: allResources[i].data.permalink})
+    filteredResources = filteredResources.concat({
+      subreddit: allResources[i].data.subreddit,
+      karma: allResources[i].data.score,
+      title: allResources[i].data.title,
+      comment: allResources[i].data.body,
+      link: allResources[i].data.permalink
+    })
   }
 
   return filteredResources
