@@ -49,8 +49,8 @@ app.get('/stats', async function(req, res) {
   var result = {}
   if(filter != null){
     filterResourcesComments = await filterResources(filter, allComments)
-    console.log(JSON.stringify(filterResourcesComments, null, 4))
     filterResourcesPosts = await filterResources(filter, allPosts)
+    console.log(JSON.stringify(await editFilteredData(filter, filterResourcesPosts), null, 4))
     result = {
       comment_stats: await calculateResourceData(filterResourcesComments, 'comments'),
       post_stats: await calculateResourceData(filterResourcesPosts, 'submitted'),
@@ -176,8 +176,8 @@ function findHighestKarma(resources, resourceType){
     }
   }
 
-  result = {highestKarma: highestKarma, highestKarmaLink: highestKarmaLink,
-     highestKarmaText: highestKarmaText}
+  result = { highestKarma: highestKarma, highestKarmaLink: highestKarmaLink,
+     highestKarmaText: highestKarmaText }
 
   return result
 
@@ -205,8 +205,4 @@ function editFilteredData(filter, allResources){
   return filteredResources
 }
 
-function sum(a, b) {
-  return a + b;
-}
-
-module.exports = { app, sum, calculateResourceData, filterResources }
+module.exports = { app, calculateResourceData, filterResources, editFilteredData }
