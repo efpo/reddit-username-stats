@@ -87,6 +87,7 @@ async function getItems(resourceType, username){
 
 async function getResources(afterID, username, resourceType){
   console.log('getResources called with ', resourceType, username)
+  //mock reddit here
   return await reddit.get('/user/' + username + '/' + resourceType, {
     context: 4,
     show: 'given',
@@ -211,4 +212,4 @@ function editFilteredData(filter, allResources){
   return filteredResources
 }
 
-module.exports = { app, calculateResourceData, filterResources, editFilteredData }
+module.exports = { app, calculateResourceData, filterResources, editFilteredData, getResources, reddit }
