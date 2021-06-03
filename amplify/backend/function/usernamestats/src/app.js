@@ -36,6 +36,14 @@ const reddit = new Reddit({
   userAgent: 'usernamestats/1.0.0'
 })
 
+class UserNotFoundError extends Error {
+  constructor(username) {
+    super(`user ${username} was not found`);
+    this.name = "UserNotFoundError";
+    this.statusCode = 404;
+  }
+}
+
 app.get('/stats', async function(req, res) {
 
   const username = req.query.username
@@ -43,8 +51,21 @@ app.get('/stats', async function(req, res) {
   //example: GovSchwarzenegger
   //example:Danny109_____
   //example: hscheel
-  allComments = await getItems('comments', username)
-  allPosts = await getItems('submitted', username)
+  try {
+    allComments = await getItems('comments', username)
+    allPosts = await getItems('submitted', username)
+  } catch(error) {
+    //if user not found, put message from error and return status code 404
+    if (error instanceof UserNotFoundError) {
+      res.status(error.statusCode)
+      res.json({ message: "Invalid data: " + error.message,
+                  name: error.name,
+                  property: error.propery
+              })
+    } else {
+      throw error
+    }
+  }
 
   var result = {}
   if(filter != null){
@@ -73,7 +94,8 @@ async function getItems(resourceType, username){
   afterID = 0
 
   while(true){
-    await getResources(afterID, username, resourceType).then(result => {
+    await getResources(afterID, username, resourceType)
+    .then(result => {
       afterID = result.data.after
       noOfResources = Object.keys(result.data.children).length
       allResources= allResources.concat(result.data.children)
@@ -85,21 +107,38 @@ async function getItems(resourceType, username){
   return allResources
 }
 
+
+//ERROR HANDLING: bad username causes unhandled promise error
+//bad subreddit causes empty return
 async function getResources(afterID, username, resourceType){
   console.log('getResources called with ', resourceType, username)
   //mock reddit here
-  return await reddit.get('/user/' + username + '/' + resourceType, {
-    context: 4,
-    show: 'given',
-    sort: 'new',
-    t: 'all',
-    type: resourceType,
-    username: username,
-    after: afterID,
-    // before:,
-    // count:,
-    limit: 100,
-  })
+  try {
+    console.log('trying....getresources...this is happening')
+    return await reddit.get('/user/' + username + '/' + resourceType, {
+      context: 4,
+      show: 'given',
+      sort: 'new',
+      t: 'all',
+      type: resourceType,
+      username: username,
+      after: afterID,
+      // before:,
+      // count:,
+      limit: 100,
+    })
+  } catch (error) {
+      console.log('there is an error!!!!')
+      console.log(error.message)
+      //if 404 in error string, create user not found error and throw it
+      if(error.message.includes('404')){
+        console.log('error with 404!!!!')
+        throw new UserNotFoundError(username);
+      } else {
+        console.log(error)
+        throw error
+      }
+  }
 }
 
 
@@ -212,4 +251,4 @@ function editFilteredData(filter, allResources){
   return filteredResources
 }
 
-module.exports = { app, calculateResourceData, filterResources, editFilteredData, getResources, reddit }
+module.exports = { app, calculateResourceData, filterResources, editFilteredData, getResources, reddit, UserNotFoundError }
