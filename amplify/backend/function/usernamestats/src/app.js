@@ -6,9 +6,6 @@ Licensed under the Apache License, Version 2.0 (the "License"). You may not use 
 or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 */
-//ERROR HANDLING
-//TESTING
-//CLEAN UP
 
 var express = require('express')
 var bodyParser = require('body-parser')
@@ -55,7 +52,7 @@ app.get('/stats', async function(req, res) {
     allComments = await getItems('comments', username)
     allPosts = await getItems('submitted', username)
   } catch(error) {
-    //if user not found, put message from error and return status code 404
+    //if user not found, put message from error and return correct status
     if (error instanceof UserNotFoundError) {
       res.status(error.statusCode)
       res.json({ message: "Invalid data: " + error.message,
@@ -108,11 +105,8 @@ async function getItems(resourceType, username){
 }
 
 
-//ERROR HANDLING: bad username causes unhandled promise error
-//bad subreddit causes empty return
 async function getResources(afterID, username, resourceType){
   console.log('getResources called with ', resourceType, username)
-  //mock reddit here
   try {
     console.log('trying....getresources...this is happening')
     return await reddit.get('/user/' + username + '/' + resourceType, {
