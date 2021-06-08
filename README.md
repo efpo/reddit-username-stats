@@ -1,5 +1,6 @@
 #  Reddit Username Stats
 
+
 This is a simple backend app that serves data about a reddit user.
 
 The app uses AWS amplify to create a serverless (AWS lambda) express app, which connects to the reddit api to fetch data.
@@ -128,3 +129,33 @@ returns JSON output:
 It's also possible to add a subreddit filter to get stats, comments and posts of only a specific subreddit:
 
 `<your-amplify-url-here>/stats?username=GovSchwarzenegger&filter=fitness`
+
+## Deployment
+
+1. Create a reddit app here:
+
+    https://ssl.reddit.com/prefs/apps/
+
+    You will be given an app ID and app secret key.
+
+2. Install the amplify CLI and go through the AWS set up.
+
+  https://docs.amplify.aws/cli/start/install
+
+3. Run `amplify init --app https://github.com/efpo/reddit-username-stats`
+
+4. Add your environment variables to your lambda function in the AWS console.
+```
+REDDIT_USERNAME=<your-reddit-username>
+REDDIT_PASSWORD=<your-reddit-password>
+REDDIT_APPID=<your-redditapp-app-id>
+REDDIT_APPSECRET=<your-redditapp-secret-key>
+```
+
+5. Now you should be able to run a request.
+
+  `<your-lambda-link>/stats?username=<reddit-username>`
+
+  or
+
+  `<your-lambda-link>/stats?username=<reddit-username>&filter=<subreddit-name>`
