@@ -132,7 +132,7 @@ It's also possible to add a subreddit filter to get stats, comments and posts of
 
 ## Deployment
 
-1. Create a reddit app here:
+1. Create a reddit app here, NOTE: the type of app should be 'script':
 
     https://ssl.reddit.com/prefs/apps/
 
