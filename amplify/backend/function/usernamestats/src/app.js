@@ -42,7 +42,6 @@ class UserNotFoundError extends Error {
 }
 
 app.get('/stats', async function(req, res) {
-
   const username = req.query.username
   const filter = req.query.filter
   //example: GovSchwarzenegger
@@ -122,11 +121,8 @@ async function getResources(afterID, username, resourceType){
       limit: 100,
     })
   } catch (error) {
-      console.log('there is an error!!!!')
-      console.log(error.message)
       //if 404 in error string, create user not found error and throw it
       if(error.message.includes('404')){
-        console.log('error with 404!!!!')
         throw new UserNotFoundError(username);
       } else {
         console.log(error)

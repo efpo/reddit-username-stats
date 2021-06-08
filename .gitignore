@@ -10,6 +10,8 @@ amplify/backend/function/usernamestats/src/.env
 build/
 dist/
 node_modules/
+amplify/backend/function/usernamestats/src/coverage/
+coverage/
 aws-exports.js
 awsconfiguration.json
 amplifyconfiguration.json
