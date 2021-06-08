@@ -1,0 +1,12 @@
+{
+  "name": "usernamestats",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "start": "node amplify/backend/function/usernamestats/src/index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
