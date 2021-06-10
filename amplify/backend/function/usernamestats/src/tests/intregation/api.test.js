@@ -1,7 +1,7 @@
-const getResources = require('../../app').getResources
-const reddit = require('../../app').reddit
-const UserNotFoundError = require('../../app').UserNotFoundError
-const allComments = require('../unit/rawdata-comments.json')
+const { stats, getResources, reddit, UserNotFoundError } = require('../../app')
+const filteredComments = require('./expected-filtered-comment-output.json')
+const comments = require('./expected-comment-output.json')
+const allComments = require('./raw-comments.json')
 
 test("fetches results from reddit api", async (done) => {
 
@@ -29,6 +29,56 @@ test("fetches results from reddit api", async (done) => {
         });
         done()
 });
+
+test("returns results from reddit api", async (done) => {
+
+  reddit.get = jest.fn().mockResolvedValue(allComments);
+  let afterID = 0;
+  let username = 'hscheel'
+  let resourceType = 'comments'
+  const req = {
+    query: {
+      username: 'hscheel',
+      filter: undefined
+    }
+  }
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn()
+  }
+
+  await stats(req, res).then(response => {
+    expect(res.json).toHaveBeenCalledWith(comments);
+    done()
+  });
+
+})
+
+test("returns filtered results from reddit api", async (done) => {
+
+  reddit.get = jest.fn().mockResolvedValue(allComments);
+  let afterID = 0;
+  let username = 'hscheel'
+  let resourceType = 'comments'
+  const req = {
+    query: {
+      username: 'hscheel',
+      filter: 'houseplants'
+    }
+  }
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn()
+  }
+
+  await stats(req, res).then(response => {
+    expect(res.json).toHaveBeenCalledWith(filteredComments);
+    done()
+  });
+
+})
 
 test("returns correct error message when trying to fetch results from reddit api", async (done) => {
 
